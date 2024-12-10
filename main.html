@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华容道 Huarong Dao</title>
+    <style>
+        :root {
+            --cell-size: 60px;
+            --board-color: #f0d9b5;
+            --piece-color: #b58863;
+            --cao-color: #d18b47;
+            --text-color: #f4f4f4;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #2f2f2f;
+            font-family: Arial, sans-serif;
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, var(--cell-size));
+            grid-template-rows: repeat(5, var(--cell-size));
+            gap: 2px;
+            padding: 10px;
+            background: var(--board-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .piece {
+            background: var(--piece-color);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .piece:hover {
+            filter: brightness(1.1);
+        }
+
+        .piece.selected {
+            filter: brightness(1.2);
+            transform: scale(0.95);
+        }
+
+        .piece.cao {
+            background: var(--cao-color);
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background: var(--piece-color);
+            color: var(--text-color);
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        .stats {
+            margin-top: 10px;
+            color: var(--text-color);
+        }
+
+        .direction-arrow {
+            position: absolute;
+            background: var(--piece-color);
+            color: var(--text-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+
+        .direction-arrow:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 style="color: var(--text-color)">华容道 Huarong Dao</h1>
+        <div class="board" id="board"></div>
+        <div class="controls">
+            <button id="resetBtn">Reset Game</button>
+            <button id="undoBtn">Undo Move</button>
+        </div>
+        <div class="stats">
+            Moves: <span id="moveCount">0</span> | 
+            Best: <span id="bestScore">-</span>
+        </div>
+    </div>
+
+    <script>
+        class HuarongGame {
+            constructor() {
+                this.BOARD_WIDTH = 4;
+                this.BOARD_HEIGHT = 5;
+                this.moves = 0;
+                this.bestScore = localStorage.getItem('bestScore') || '-';
+                this.moveHistory = [];
+                this.selectedPiece = null;
+
+                this.BLOCKS = {
+                    CAO_CAO: { width: 2, height: 2, char: '曹操', class: 'cao' },
+                    VERTICAL: { width: 1, height: 2, char: '｜' },
+                    HORIZONTAL: { width: 2, height: 1, char: '一' },
+                    SINGLE: { width: 1, height: 1, char: '口' }
+                };
+
+                this.DEFAULT_LAYOUT = [
+                    { type: 'VERTICAL', x: 0, y: 0 },
+                    { type: 'CAO_CAO', x: 1, y: 0 },
+                    { type: 'VERTICAL', x: 3, y: 0 },
+                    { type: 'HORIZONTAL', x: 0, y: 2 },
+                    { type: 'HORIZONTAL', x: 2, y: 2 },
+                    { type: 'SINGLE', x: 0, y: 3 },
+                    { type: 'SINGLE', x: 1, y: 3 },
+                    { type: 'SINGLE', x: 2, y: 3 },
+                    { type: 'SINGLE', x: 3, y: 3 },
+                    { type: 'SINGLE', x: 0, y: 4 },
+                    { type: 'SINGLE', x: 3, y: 4 }
+                ];
+
+                this.blocks = JSON.parse(JSON.stringify(this.DEFAULT_LAYOUT));
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                const board = document.getElementById('board');
+                board.innerHTML = '';
+                this.createBoard();
+                this.renderPieces();
+                this.updateStats();
+
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetGame());
+                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
+            }
+
+            createBoard() {
+                const board = document.getElementById('board');
+                board.style.gridTemplateColumns = `repeat(${this.BOARD_WIDTH}, var(--cell-size))`;//这将创建一个5列的网格，每列的宽度 --cell-size 变量定义的值。
+                board.style.gridTemplateRows = `repeat(${this.BOARD_HEIGHT}, var(--cell-size))`;
+            }
+
+            renderPieces() {
+                const board = document.getElementById('board');
+                board.innerHTML = '';
+                
+                this.blocks.forEach((block, index) => {
+                    const blockType = this.BLOCKS[block.type];
+                    const piece = document.createElement('div');
+                    piece.className = `piece ${blockType.class || ''}`;
+                    piece.textContent = blockType.char;
+                    piece.style.gridColumn = `${block.x + 1} / span ${blockType.width}`;
+                    piece.style.gridRow = `${block.y + 1} / span ${blockType.height}`;
+                    piece.dataset.index = index;
+
+                    piece.addEventListener('click', () => this.handlePieceClick(index));
+                    board.appendChild(piece);
+                });
+            }
+
+            handlePieceClick(index) {
+                // Remove any existing arrows first
+                document.querySelectorAll('.direction-arrow').forEach(arrow => arrow.remove());
+                
+                const block = this.blocks[index];
+                const moves = this.getPossibleMoves(block);
+
+                if (moves.length === 0) {
+                    return; // Can't move
+                } else if (moves.length === 1) {
+                    this.moveToPosition(index, moves[0]);
+                } else {
+                    this.showMoveOptions(index, moves);
+                }
+            }
+
+            showMoveOptions(index, moves) {
+                const block = this.blocks[index];
+                const piece = document.querySelector(`[data-index="${index}"]`);
+                const board = document.getElementById('board');
+                const rect = piece.getBoundingClientRect();
+                const boardRect = board.getBoundingClientRect();
+
+                // Remove any existing arrows
+                document.querySelectorAll('.direction-arrow').forEach(arrow => arrow.remove());
+
+                moves.forEach(move => {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'direction-arrow';
+                    
+                    // Calculate position relative to the piece
+                    const direction = this.getDirectionText(block, move);
+                    const arrowText = {
+                        'Left': '←',
+                        'Right': '→',
+                        'Up': '↑',
+                        'Down': '↓'
+                    }[direction];
+
+                    // Position the arrow based on direction
+                    const pieceWidth = rect.width;
+                    const pieceHeight = rect.height;
+                    let left, top;
+
+                    switch(direction) {
+                        case 'Left':
+                            left = rect.left - boardRect.left - 35;
+                            top = rect.top - boardRect.top + (pieceHeight/2) - 15;
+                            break;
+                        case 'Right':
+                            left = rect.right - boardRect.left + 5;
+                            top = rect.top - boardRect.top + (pieceHeight/2) - 15;
+                            break;
+                        case 'Up':
+                            left = rect.left - boardRect.left + (pieceWidth/2) - 15;
+                            top = rect.top - boardRect.top - 35;
+                            break;
+                        case 'Down':
+                            left = rect.left - boardRect.left + (pieceWidth/2) - 15;
+                            top = rect.bottom - boardRect.top + 5;
+                            break;
+                    }
+
+                    arrow.style.left = `${left}px`;
+                    arrow.style.top = `${top}px`;
+                    arrow.textContent = arrowText;
+                    
+                    arrow.onclick = () => {
+                        this.moveToPosition(index, move);
+                        document.querySelectorAll('.direction-arrow').forEach(a => a.remove());
+                    };
+
+                    board.appendChild(arrow);
+                });
+            }
+
+            getDirectionText(block, move) {
+                if (move.x < block.x) return "Left";
+                if (move.x > block.x) return "Right";
+                if (move.y < block.y) return "Up";
+                return "Down";
+            }
+
+            moveToPosition(blockIndex, position) {
+                this.moveHistory.push(JSON.stringify(this.blocks));
+                const block = this.blocks[blockIndex];
+                block.x = position.x;
+                block.y = position.y;
+                this.moves++;
+                this.updateStats();
+                this.renderPieces();
+                this.checkWin(block);
+            }
+
+            updatePieceSelection() {
+                document.querySelectorAll('.piece').forEach(piece => {
+                    piece.style.filter = 'none';
+                });
+                if (this.selectedPiece !== null) {
+                    const piece = document.querySelector(`[data-index="${this.selectedPiece}"]`);
+                    piece.style.filter = 'brightness(1.2)';
+                }
+            }
+
+            isAdjacent(block1, block2) {
+                const b1Type = this.BLOCKS[block1.type];
+                const b2Type = this.BLOCKS[block2.type];
+
+                const b1Right = block1.x + b1Type.width;
+                const b1Bottom = block1.y + b1Type.height;
+                const b2Right = block2.x + b2Type.width;
+                const b2Bottom = block2.y + b2Type.height;
+
+                return (
+                    (Math.abs(b1Right - block2.x) === 0 && 
+                     this.hasVerticalOverlap(block1, block2)) ||
+                    (Math.abs(block1.x - b2Right) === 0 && 
+                     this.hasVerticalOverlap(block1, block2)) ||
+                    (Math.abs(b1Bottom - block2.y) === 0 && 
+                     this.hasHorizontalOverlap(block1, block2)) ||
+                    (Math.abs(block1.y - b2Bottom) === 0 && 
+                     this.hasHorizontalOverlap(block1, block2))
+                );
+            }
+
+            hasVerticalOverlap(block1, block2) {
+                const b1Type = this.BLOCKS[block1.type];
+                const b2Type = this.BLOCKS[block2.type];
+                return !(block1.y >= block2.y + b2Type.height || 
+                        block2.y >= block1.y + b1Type.height);
+            }
+
+            hasHorizontalOverlap(block1, block2) {
+                const b1Type = this.BLOCKS[block1.type];
+                const b2Type = this.BLOCKS[block2.type];
+                return !(block1.x >= block2.x + b2Type.width || 
+                        block2.x >= block1.x + b1Type.width);
+            }
+
+            getPossibleMoves(block) {
+                const moves = [];
+                const blockType = this.BLOCKS[block.type];
+                
+                [[-1,0], [1,0], [0,-1], [0,1]].forEach(([dx, dy]) => {
+                    const newX = block.x + dx;
+                    const newY = block.y + dy;
+                    
+                    if (this.isValidMove(block, newX, newY)) {
+                        moves.push({x: newX, y: newY});
+                    }
+                });
+                
+                return moves;
+            }
+
+            isValidMove(block, newX, newY) {
+                const blockType = this.BLOCKS[block.type];
+
+                if (newX < 0 || newY < 0 || 
+                    newX + blockType.width > this.BOARD_WIDTH ||
+                    newY + blockType.height > this.BOARD_HEIGHT) {
+                    return false;
+                }
+
+                return !this.blocks.some(otherBlock => {
+                    if (block === otherBlock) return false;
+                    
+                    const otherType = this.BLOCKS[otherBlock.type];
+                    return this.rectsIntersect(
+                        {x: newX, y: newY, w: blockType.width, h: blockType.height},
+                        {x: otherBlock.x, y: otherBlock.y, w: otherType.width, h: otherType.height}
+                    );
+                });
+            }
+
+            rectsIntersect(r1, r2) {
+                return !(r2.x >= r1.x + r1.w ||
+                        r2.x + r2.w <= r1.x ||
+                        r2.y >= r1.y + r1.h ||
+                        r2.y + r2.h <= r1.y);
+            }
+
+            checkWin(block) {
+                if (block.type === 'CAO_CAO' && block.y === this.BOARD_HEIGHT - 2) {
+                    if (this.bestScore === '-' || this.moves < this.bestScore) {
+                        this.bestScore = this.moves;
+                        localStorage.setItem('bestScore', this.moves);
+                    }
+                    setTimeout(() => {
+                        alert(`Congratulations! You won in ${this.moves} moves!`);
+                        this.resetGame();
+                    }, 100);
+                }
+            }
+
+            undoMove() {
+                if (this.moveHistory.length > 0) {
+                    this.blocks = JSON.parse(this.moveHistory.pop());
+                    this.moves--;
+                    this.updateStats();
+                    this.renderPieces();
+                }
+            }
+
+            resetGame() {
+                document.querySelectorAll('.direction-arrow').forEach(arrow => arrow.remove());
+                this.blocks = JSON.parse(JSON.stringify(this.DEFAULT_LAYOUT));
+                this.moves = 0;
+                this.moveHistory = [];
+                this.selectedPiece = null;
+                this.updateStats();
+                this.renderPieces();
+            }
+
+            updateStats() {
+                document.getElementById('moveCount').textContent = this.moves;
+                document.getElementById('bestScore').textContent = this.bestScore;
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            new HuarongGame();
+        });
+    </script>
+</body>
+</html>
