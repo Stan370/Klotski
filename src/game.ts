@@ -27,6 +27,7 @@ export class HuarongGame {
   private selectedPiece: number | null = null;
   private blocks: Block[];
   private userId: string | null = null;
+  private currentLevel: number;
 
   private readonly BLOCKS: { [key: string]: BlockType } = {
     CAO_CAO: { width: 2, height: 2, char: "曹操", class: "cao" },
@@ -36,9 +37,11 @@ export class HuarongGame {
   };
 
   constructor(level: number = 0) {
+    this.currentLevel = level;
     this.bestScore = "-";
     this.blocks = JSON.parse(JSON.stringify(LEVELS[level].layout));
     this.initializeGame();
+    this.initializeLevelSelector();
   }
 
   async promptForUserId(): Promise<string | null> {
@@ -67,6 +70,33 @@ export class HuarongGame {
 
     const undoBtn = document.getElementById("undoBtn");
     undoBtn?.addEventListener("click", () => this.undoMove());
+  }
+
+  private initializeLevelSelector() {
+    const levelSelector = document.getElementById('levelSelector') as HTMLSelectElement;
+    if (levelSelector) {
+      levelSelector.value = this.currentLevel.toString();
+      levelSelector.addEventListener('change', (e) => {
+        const newLevel = parseInt((e.target as HTMLSelectElement).value);
+        this.changeLevel(newLevel);
+      });
+    }
+  }
+
+  private changeLevel(level: number) {
+    this.currentLevel = level;
+    this.blocks = JSON.parse(JSON.stringify(LEVELS[level].layout));
+    this.moves = 0;
+    this.moveHistory = [];
+    this.selectedPiece = null;
+    if (!this.userId) {
+      this.bestScore = "-";
+    } else {
+      const existingBestScore = localStorage.getItem(`bestScore_${this.userId}_level${level}`);
+      this.bestScore = existingBestScore ? parseInt(existingBestScore) : "-";
+    }
+    this.updateStats();
+    this.renderPieces();
   }
 
   createBoard() {
@@ -324,9 +354,13 @@ export class HuarongGame {
           }
         }
         
-        if (this.userId && (this.bestScore === "-" || this.moves < Number(this.bestScore))) {
-          this.bestScore = this.moves;
-          localStorage.setItem(`bestScore_${this.userId}`, this.moves.toString());
+        if (this.userId) {
+          const scoreKey = `bestScore_${this.userId}_level${this.currentLevel}`;
+          const currentBest = localStorage.getItem(scoreKey);
+          if (!currentBest || this.moves < Number(currentBest)) {
+            this.bestScore = this.moves;
+            localStorage.setItem(scoreKey, this.moves.toString());
+          }
         }
         
         alert(`Congratulations! You won in ${this.moves} moves!`);
@@ -353,7 +387,7 @@ export class HuarongGame {
     document
       .querySelectorAll(".direction-arrow")
       .forEach((arrow) => arrow.remove());
-    this.blocks = JSON.parse(JSON.stringify(LEVELS[0].layout));
+    this.blocks = JSON.parse(JSON.stringify(LEVELS[this.currentLevel].layout));
     this.moves = 0;
     this.moveHistory = [];
     this.selectedPiece = null;

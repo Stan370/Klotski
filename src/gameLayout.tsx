@@ -43,19 +43,18 @@ const LEVELS: Level[] = [
     ]
   },
   {
-    name: "将撞曹营",
-    layout: [
-      { type: "VERTICAL", x: 0, y: 0 },
-      { type: "CAO_CAO", x: 1, y: 0 },
-      { type: "VERTICAL", x: 3, y: 0 },
-      { type: "HORIZONTAL", x: 1, y: 2 },
-      { type: "HORIZONTAL", x: 2, y: 2 },
-      { type: "SINGLE", x: 0, y: 3 },
-      { type: "SINGLE", x: 1, y: 3 },
-      { type: "SINGLE", x: 2, y: 3 },
-      { type: "SINGLE", x: 3, y: 3 },
-      { type: "SINGLE", x: 0, y: 4 },
-      { type: "SINGLE", x: 3, y: 4 }
+    "name": "四面楚歌",
+    "layout": [
+      { "type": "CAO_CAO", "x": 1, "y": 0 },
+      { "type": "VERTICAL", "x": 0, "y": 0 },
+      { "type": "VERTICAL", "x": 3, "y": 0 },
+      { "type": "HORIZONTAL", "x": 1, "y": 2 },
+      { "type": "SINGLE", "x": 0, "y": 2 },
+      { "type": "SINGLE", "x": 3, "y": 2 },
+      { "type": "SINGLE", "x": 1, "y": 3 },
+      { "type": "SINGLE", "x": 2, "y": 3 },
+      { "type": "SINGLE", "x": 0, "y": 4 },
+      { "type": "SINGLE", "x": 3, "y": 4 }
     ]
   },
   {

@@ -1,5 +1,5 @@
 :root {
-  --cell-size: 60px;
+  --cell-size: 90px;  /* Increased from 60px to 90px (50% larger) */
   --board-color: #f0d9b5;
   --piece-color: #b58863;
   --cao-color: #d18b47;
@@ -116,6 +116,25 @@ button:hover {
   width: 20px;
   height: 20px;
   fill: var(--text-color);
+}
+
+.level-selector {
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+.level-selector select {
+  padding: 8px 15px;
+  font-size: 16px;
+  border: 2px solid var(--piece-color);
+  border-radius: 4px;
+  background: var(--board-color);
+  color: var(--piece-color);
+  cursor: pointer;
+}
+
+.level-selector select:hover {
+  border-color: var(--cao-color);
 }
 
 /* :root {
