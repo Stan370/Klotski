@@ -45,7 +45,7 @@ export class HuarongGame {
   }
 
   async promptForUserId(): Promise<string | null> {
-    const id = prompt("Enter your user ID to save your score:");
+    const id = prompt("Congratulations, you won! Enter your user ID to save your score:");
     if (id) {
       this.userId = id;
       const existingBestScore = localStorage.getItem(`bestScore_${id}`);
