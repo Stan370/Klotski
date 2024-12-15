@@ -15,8 +15,8 @@ const LEVELS: Level[] = [
   {
     name: "横刀立马",
     layout: [
-      { type: "VERTICAL", x: 0, y: 0 },
       { type: "CAO_CAO", x: 1, y: 0 },
+      { type: "VERTICAL", x: 0, y: 0 },
       { type: "VERTICAL", x: 3, y: 0 },
       { type: "VERTICAL", x: 0, y: 2 },
       { type: "VERTICAL", x: 3, y: 2 },

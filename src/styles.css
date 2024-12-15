@@ -96,12 +96,11 @@ button:hover {
 
 .direction-arrow {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  align-items: center; /* Center the SVG icon vertically */
   cursor: pointer;
   z-index: 100;
   transition: transform 0.2s;
@@ -133,4 +132,27 @@ button:hover {
 
 .level-selector select:hover {
   border-color: var(--cao-color);
+}
+
+.language-selector {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.language-selector select {
+  padding: 8px 15px;
+  font-size: 16px;
+  border: 2px solid var(--piece-color);
+  border-radius: 4px;
+  background: var(--board-color);
+  color: var(--piece-color);
+  cursor: pointer;
+}
+
+.controls-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
 }

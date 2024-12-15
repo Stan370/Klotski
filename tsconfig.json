@@ -12,14 +12,17 @@
       "isolatedModules": true,
       "moduleDetection": "force",
       "noEmit": true,
-  
-      /* Linting */
+      "jsx": "preserve",
       "strict": true,
       "noUnusedLocals": true,
       "noUnusedParameters": true,
       "noFallthroughCasesInSwitch": true,
-      "noUncheckedSideEffectImports": true
+      "noUncheckedSideEffectImports": true,
+      "paths": {
+      "@/*": ["./*"]
+      }
     },
-    "include": ["src"]
-  }
+    "exclude": ["node_modules","**/examples/*","lib/*"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    }
   

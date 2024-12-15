@@ -1,9 +1,11 @@
-import LEVELS from './gameLayout';
+import LEVELS from "./gameLayout";
+import { translations, Language } from './translations';
 
 interface Block {
   type: string;
   x: number;
   y: number;
+  char?: string; // Add this property
 }
 
 interface BlockType {
@@ -28,24 +30,57 @@ export class HuarongGame {
   private blocks: Block[];
   private userId: string | null = null;
   private currentLevel: number;
+  private language: Language = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'zh';
 
-  private readonly BLOCKS: { [key: string]: BlockType } = {
-    CAO_CAO: { width: 2, height: 2, char: "曹操", class: "cao" },
-    VERTICAL: { width: 1, height: 2, char: "｜" },
-    HORIZONTAL: { width: 2, height: 1, char: "一" },
-    SINGLE: { width: 1, height: 1, char: "口" },
-  };
+  private generals = ["张飞", "马超", "赵云", "黄忠"];
+  private generalIndex = 0;
+  private horizontalGenerals = ["关羽", "周仓", "魏延", "庞德"];
+  private horizontalIndex = 0;
+
+  private BLOCKS: { [key: string]: BlockType };
+
+  private getNextGeneral(): string {
+    const char = this.generals[this.generalIndex];
+    this.generalIndex = (this.generalIndex + 1) % this.generals.length;
+    return char;
+  }
+
+  private getNextHorizontalGeneral(): string {
+    const char = this.horizontalGenerals[this.horizontalIndex];
+    this.horizontalIndex = (this.horizontalIndex + 1) % this.horizontalGenerals.length;
+    return char;
+  }
 
   constructor(level: number = 0) {
+    this.BLOCKS = {
+      CAO_CAO: { width: 2, height: 2, char: "曹操", class: "cao" },
+      VERTICAL: { width: 1, height: 2, char: "将军" },
+      HORIZONTAL: { width: 2, height: 1, char: "将军" },
+      SINGLE: { width: 1, height: 1, char: "兵" },
+    };
+
     this.currentLevel = level;
     this.bestScore = "-";
     this.blocks = JSON.parse(JSON.stringify(LEVELS[level].layout));
+    
+    // Assign character names to blocks
+    this.blocks.forEach(block => {
+      if (block.type === 'VERTICAL') {
+        block.char = this.getNextGeneral();
+      } else if (block.type === 'HORIZONTAL') {
+        block.char = this.getNextHorizontalGeneral();
+      }
+    });
+
     this.initializeGame();
     this.initializeLevelSelector();
+    this.initializeLanguageSelector();
   }
 
   async promptForUserId(): Promise<string | null> {
-    const id = prompt("Congratulations, you won! Enter your user ID to save your score:");
+    const id = prompt(
+      "Congratulations, you won! Enter your user ID to save your score:"
+    );
     if (id) {
       this.userId = id;
       const existingBestScore = localStorage.getItem(`bestScore_${id}`);
@@ -64,6 +99,7 @@ export class HuarongGame {
     this.createBoard();
     this.renderPieces();
     this.updateStats();
+    this.updateUIText();
 
     const resetBtn = document.getElementById("resetBtn");
     resetBtn?.addEventListener("click", () => this.resetGame());
@@ -73,26 +109,60 @@ export class HuarongGame {
   }
 
   private initializeLevelSelector() {
-    const levelSelector = document.getElementById('levelSelector') as HTMLSelectElement;
+    const levelSelector = document.getElementById(
+      "levelSelector"
+    ) as HTMLSelectElement;
     if (levelSelector) {
       levelSelector.value = this.currentLevel.toString();
-      levelSelector.addEventListener('change', (e) => {
+      levelSelector.addEventListener("change", (e) => {
         const newLevel = parseInt((e.target as HTMLSelectElement).value);
         this.changeLevel(newLevel);
       });
     }
   }
 
+  private initializeLanguageSelector() {
+    const languageSelector = document.getElementById('languageSelector') as HTMLSelectElement;
+    languageSelector.value = this.language;
+    languageSelector.addEventListener('change', (e) => {
+      this.language = (e.target as HTMLSelectElement).value as Language;
+      this.updateUIText();
+    });
+  }
+
+  private updateUIText() {
+    const t = translations[this.language];
+    document.querySelector('h1')!.textContent = t.title;
+    document.getElementById('resetBtn')!.textContent = t.reset;
+    document.getElementById('undoBtn')!.textContent = t.undo;
+    document.querySelector('.stats')!.innerHTML = 
+      `${t.moves}: <span id="moveCount">${this.moves}</span> | ${t.best}: <span id="bestScore">${this.bestScore}</span>`;
+  }
+
   private changeLevel(level: number) {
     this.currentLevel = level;
     this.blocks = JSON.parse(JSON.stringify(LEVELS[level].layout));
+    
+    // Reset indices and assign new characters for new level
+    this.generalIndex = 0;
+    this.horizontalIndex = 0;
+    this.blocks.forEach(block => {
+      if (block.type === 'VERTICAL') {
+        block.char = this.getNextGeneral();
+      } else if (block.type === 'HORIZONTAL') {
+        block.char = this.getNextHorizontalGeneral();
+      }
+    });
+
     this.moves = 0;
     this.moveHistory = [];
     this.selectedPiece = null;
     if (!this.userId) {
       this.bestScore = "-";
     } else {
-      const existingBestScore = localStorage.getItem(`bestScore_${this.userId}_level${level}`);
+      const existingBestScore = localStorage.getItem(
+        `bestScore_${this.userId}_level${level}`
+      );
       this.bestScore = existingBestScore ? parseInt(existingBestScore) : "-";
     }
     this.updateStats();
@@ -112,10 +182,10 @@ export class HuarongGame {
     board.innerHTML = "";
 
     this.blocks.forEach((block, index) => {
-      const blockType = this.BLOCKS[block.type];
+      const blockType = { ...this.BLOCKS[block.type] };
       const piece = document.createElement("div");
       piece.className = `piece ${blockType.class || ""}`;
-      piece.textContent = blockType.char;
+      piece.textContent = block.char || blockType.char; // Use stored character
       piece.style.gridColumn = `${block.x + 1} / span ${blockType.width}`;
       piece.style.gridRow = `${block.y + 1} / span ${blockType.height}`;
       piece.dataset.index = index.toString();
@@ -167,24 +237,25 @@ export class HuarongGame {
       // Position the arrow based on direction
       const pieceWidth = rect.width;
       const pieceHeight = rect.height;
+      const arrowSize = 34;
       let left, top;
 
       switch (direction) {
         case "Left":
-          left = rect.left - boardRect.left - 35;
-          top = rect.top - boardRect.top + pieceHeight / 2 - 15;
+          left = rect.left - boardRect.left - arrowSize;
+          top = rect.top - boardRect.top + pieceHeight / 2 - arrowSize / 2 - 3;
           break;
         case "Right":
-          left = rect.right - boardRect.left + 5;
-          top = rect.top - boardRect.top + pieceHeight / 2 - 15;
+          left = rect.right - boardRect.left - 7;
+          top = rect.top - boardRect.top + pieceHeight / 2 - arrowSize / 2 - 3;
           break;
         case "Up":
-          left = rect.left - boardRect.left + pieceWidth / 2 - 15;
-          top = rect.top - boardRect.top - 35;
+          left = rect.left - boardRect.left + pieceWidth / 2 - arrowSize / 2 - 3;
+          top = rect.top - boardRect.top - arrowSize;
           break;
         case "Down":
-          left = rect.left - boardRect.left + pieceWidth / 2 - 15;
-          top = rect.bottom - boardRect.top + 5;
+          left = rect.left - boardRect.left + pieceWidth / 2 - 20;
+          top = rect.bottom - boardRect.top - 7;
           break;
       }
 
@@ -279,15 +350,12 @@ export class HuarongGame {
     const b1Type = this.BLOCKS[block1.type];
     const b2Type = this.BLOCKS[block2.type];
     return !(
-      block1.x >= block2.x + b2Type.width ||
-      block2.x >= block1.x + b1Type.width
+      block1.x >= block2.x + b2Type.width || block2.x >= block1.x + b1Type.width
     );
   }
 
   getPossibleMoves(block: Block) {
     const moves: Position[] = [];
-    const blockType = this.BLOCKS[block.type];
-
     [
       [-1, 0],
       [1, 0],
@@ -333,7 +401,10 @@ export class HuarongGame {
     });
   }
 
-  rectsIntersect(r1: { x: number; y: number; w: number; h: number }, r2: { x: number; y: number; w: number; h: number }) {
+  rectsIntersect(
+    r1: { x: number; y: number; w: number; h: number },
+    r2: { x: number; y: number; w: number; h: number }
+  ) {
     return !(
       r2.x >= r1.x + r1.w ||
       r2.x + r2.w <= r1.x ||
@@ -348,12 +419,14 @@ export class HuarongGame {
         if (!this.userId) {
           const id = await this.promptForUserId();
           if (!id) {
-            alert(`Congratulations! You won in ${this.moves} moves! (Score not saved)`);
+            alert(
+              `Congratulations! You won in ${this.moves} moves! (Score not saved)`
+            );
             this.resetGame();
             return;
           }
         }
-        
+
         if (this.userId) {
           const scoreKey = `bestScore_${this.userId}_level${this.currentLevel}`;
           const currentBest = localStorage.getItem(scoreKey);
@@ -362,7 +435,7 @@ export class HuarongGame {
             localStorage.setItem(scoreKey, this.moves.toString());
           }
         }
-        
+
         alert(`Congratulations! You won in ${this.moves} moves!`);
         this.resetGame();
       };
@@ -387,7 +460,16 @@ export class HuarongGame {
     document
       .querySelectorAll(".direction-arrow")
       .forEach((arrow) => arrow.remove());
+    this.generalIndex = 0;
+    this.horizontalIndex = 0;
     this.blocks = JSON.parse(JSON.stringify(LEVELS[this.currentLevel].layout));
+    this.blocks.forEach(block => {
+      if (block.type === 'VERTICAL') {
+        block.char = this.getNextGeneral();
+      } else if (block.type === 'HORIZONTAL') {
+        block.char = this.getNextHorizontalGeneral();
+      }
+    });
     this.moves = 0;
     this.moveHistory = [];
     this.selectedPiece = null;
@@ -396,6 +478,7 @@ export class HuarongGame {
     }
     this.updateStats();
     this.renderPieces();
+    this.updateUIText();
   }
 
   updateStats() {
