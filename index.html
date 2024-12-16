@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>华容道 Huarong Dao</title>
+    <meta name="description" content="华容道 (Huarong Dao), also known as Klotski, is a classic Chinese puzzle game inspired by historical tales. Play now and test your strategy skills!" />
+    <meta name="keywords" content="Games,Huarong Dao, Klotski, sliding puzzle game, 华容道, 曹操, ancient China" />
+    <meta name="author" content="Stan Ke" />
+    <meta property="og:title" content="华容道 - Huarong Dao" />
+    <meta property="og:description" content="Explore the ancient Chinese sliding block puzzle game, 华容道 (Huarong Dao), based on the historical tale of Cao Cao and Guan Yu." />
+    <meta property="og:image" content="public/CaocaoFailed.webp" />
+    <meta property="og:type" content="website" />
+    <title>华容道 - Huarong Dao</title>
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
@@ -18,6 +25,16 @@
             <option value="3">Level 4</option>
             <option value="4">Level 5</option>
           </select>
+          
+        </div>
+        <div class="tooltip-container">
+          <span class="tooltip-trigger">?</span>
+          <div class="tooltip-content">
+            <div class="tooltip-header">华容道 - Huarong Dao</div>
+            <p> Huarong Dao(Aka. Klotski) is an ancient Chinese puzzle game based on the story of Cao Cao being surrounded after Guandu war. The goal is to solve the puzzle with a minimum number of moves or in a minimum amount of time.
+            </p>
+            <div id="levelDescription"></div>
+          </div>
         </div>
         <div class="language-selector">
           <select id="languageSelector">

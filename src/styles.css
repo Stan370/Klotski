@@ -118,6 +118,8 @@ button:hover {
 .level-selector {
   margin-bottom: 20px;
   color: var(--text-color);
+  display: flex;
+  align-items: center;
 }
 
 .level-selector select {
@@ -153,6 +155,92 @@ button:hover {
 .controls-row {
   display: flex;
   gap: 1rem;
+  justify-content: space-between;
+}
+
+.hint-btn {
+  margin-left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: #666;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.hint-btn:hover {
+  background: #888;
+}
+
+.tooltip-container {
+  display: inline-block;
+  position: relative;
+  margin-left: 8px;
+  align-items: center;
+}
+
+.tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: #666;
+  color: white;
+  font-weight: bold;
+  cursor: help;
+}
+
+.tooltip-content {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  width: 200px;
+  background: var(--board-color);
+  color: var(--piece-color);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+
+.tooltip-content::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent var(--board-color) transparent;
+}
+
+.tooltip-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.tooltip-container:hover .tooltip-content {
+  display: block;
+}
+
+.tooltip-content h3 {
+  margin: 12px 0 8px;
+  color: var(--cao-color);
+}
+
+.tooltip-content p {
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.game-intro {
+  margin-bottom: 20px;
+  line-height: 1.5;
 }

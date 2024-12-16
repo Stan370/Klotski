@@ -75,6 +75,12 @@ export class HuarongGame {
     this.initializeGame();
     this.initializeLevelSelector();
     this.initializeLanguageSelector();
+    this.initializeHintSystem();
+  }
+
+  private initializeHintSystem() {
+    const levelDesc = document.getElementById("levelDescription")!;
+    levelDesc.innerHTML = `<p>${LEVELS[this.currentLevel].description}</p>`;
   }
 
   async promptForUserId(): Promise<string | null> {
@@ -135,6 +141,29 @@ export class HuarongGame {
     document.querySelector('h1')!.textContent = t.title;
     document.getElementById('resetBtn')!.textContent = t.reset;
     document.getElementById('undoBtn')!.textContent = t.undo;
+    
+    // Update tooltip content
+    const tooltipHeader = document.querySelector('.tooltip-header')!;
+    const tooltipIntro = document.querySelector('.tooltip-content > p')!;
+    const levelDesc = document.getElementById('levelDescription')!;
+
+    tooltipHeader.textContent = t.title;
+    tooltipIntro.textContent = t.gameIntro;
+    
+    // Find current level info
+    const currentLevelInfo = t.levels.find(level => level.id === LEVELS[this.currentLevel].name);
+    levelDesc.innerHTML = `
+      <h3>${currentLevelInfo?.name}</h3>
+      <p>${currentLevelInfo?.description}</p>
+    `;
+
+    // Update level selector options
+    const levelSelector = document.getElementById('levelSelector') as HTMLSelectElement;
+    t.levels.forEach((level, index) => {
+      levelSelector.options[index].text = `${t.level} ${index + 1}: ${level.name}`;
+    });
+
+    // Update stats display
     document.querySelector('.stats')!.innerHTML = 
       `${t.moves}: <span id="moveCount">${this.moves}</span> | ${t.best}: <span id="bestScore">${this.bestScore}</span>`;
   }
@@ -167,6 +196,13 @@ export class HuarongGame {
     }
     this.updateStats();
     this.renderPieces();
+    const t = translations[this.language];
+    const currentLevelInfo = t.levels.find(level => level.id === LEVELS[this.currentLevel].name);
+    const levelDesc = document.getElementById("levelDescription")!;
+    levelDesc.innerHTML = `
+      <h3>${currentLevelInfo?.name}</h3>
+      <p>${currentLevelInfo?.description}</p>
+    `;
   }
 
   createBoard() {
