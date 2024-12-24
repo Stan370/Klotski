@@ -31,6 +31,7 @@ export class HuarongGame {
   private userId: string | null = null;
   private currentLevel: number;
   private language: Language = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'zh';
+  private slideSound = new Audio("slideBlock.mp3");
 
   private generals = ["张飞", "马超", "赵云", "黄忠"];
   private generalIndex = 0;
@@ -58,7 +59,7 @@ export class HuarongGame {
       HORIZONTAL: { width: 2, height: 1, char: "将军" },
       SINGLE: { width: 1, height: 1, char: "兵" },
     };
-
+    this.slideSound.volume = 0.2;
     this.currentLevel = level;
     this.bestScore = "-";
     this.blocks = JSON.parse(JSON.stringify(LEVELS[level].layout));
@@ -333,6 +334,7 @@ export class HuarongGame {
     block.x = position.x;
     block.y = position.y;
     this.moves++;
+    this.slideSound.play();
     this.updateStats();
     this.renderPieces();
     this.checkWin(block);
