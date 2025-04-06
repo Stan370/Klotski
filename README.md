@@ -9,26 +9,11 @@ Klotski is a WEB sliding block puzzle that's popular throughout China. Its story
 The goal is to move the largest block (2x2 block) to an exit with a two-grid side length below without taking it away from the board, while only sliding the blocks.
 
 ---
+This project is a browser-based Klotski puzzle game, inspired by the classic Klotski by ZH Computer (1991, Windows 3.0). It features level-based leaderboards using Redis, tracks user moves, and allows players to compete for the lowest move count. The game is built with TypeScript, Redis, and a frontend UI, and was integrated into Reddit as a game post to attract players.
 
 ### **Historical Background**  
 The game is named after the story of **Cao Cao's defeat on the Huarong Road** in *"Romance of the Three Kingdoms"* and **Guan Yunchang's righteous explanation of Cao Cao's release**.  
 
-However, the origin of this game is not what most people consider to be "one of the oldest games in China." The history of the Huarongdao game is relatively short:  
-
-- **1934**: John Harold Fleming obtained a patent for a similar puzzle in England.  
-- **1943**: Liang Qing, a teacher in the New Fourth Route Army, publicized the Huarong Dao after learning it from people in northern Jiangsu province. It became popular among soldiers as a way to enhance their cultural life.  
-
-### **International Variants**  
-- **France**: A similar game is known as *"Red Donkey."*  
-- **Japan**: Similar games are called *"箱入り娘"* ("Daughter in a Box"), with variations including versions based on Japanese chess (*shogi*).  
-
-
-## Technical Stack
-
-- **Language**: TypeScript 4.x
-- **Build Tool**: Vite
-- **Styling**: CSS with CSS Variables for theming
-- **Architecture**: Component-based design
 
 ## Key Features
 

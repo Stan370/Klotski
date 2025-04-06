@@ -244,3 +244,49 @@ button:hover {
   margin-bottom: 20px;
   line-height: 1.5;
 }
+
+.reddit-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  text-decoration: none;
+  color: #FF4500;
+  transition: transform 0.2s;
+  height: 24px; /* Match height with other controls */
+  position: relative; /* For tooltip positioning */
+}
+
+.reddit-link:hover {
+  transform: scale(1.1);
+}
+
+.reddit-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Add tooltip for Reddit link */
+.reddit-link::after {
+  content: "Join our Reddit community and compete with others!";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 5px;
+  padding: 8px 12px;
+  background: var(--board-color);
+  color: var(--piece-color);
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.reddit-link:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
