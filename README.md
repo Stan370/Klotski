@@ -3,7 +3,7 @@
 # Klotski: The Sliding Block Puzzle  
 
 
-Klotski is a WEB sliding block puzzle that's popular throughout China. Its story is based on a well-known encounter during the **Eastern Han dynasty (25–220)** between **Cao Cao**, the shrewd and clever strategist for the Wei Kingdom, and **Guan Yu**, a commander in the Shu Kingdom army who had once served under Cao Cao.  Imagine stepping back in time to when web apps were simple, yet full of our earliest version of Web Klotski captures that nostalgic spirit. This initial build was crafted using plain HTML, CSS, and vanilla JavaScript, focusing purely on delivering the core sliding block puzzle mechanics that made Klotski a timeless challenge.
+[Klotski is a WEB sliding block puzzle that's popular throughout China.](https://stan370.github.io/Klotski/) Its story is based on a well-known encounter during the **Eastern Han dynasty (25–220)** between **Cao Cao**, the shrewd and clever strategist for the Wei Kingdom, and **Guan Yu**, a commander in the Shu Kingdom army who had once served under Cao Cao.  Imagine stepping back in time to when web apps were simple, yet full of our earliest version of Web Klotski captures that nostalgic spirit. This initial build was crafted using plain HTML, CSS, and vanilla JavaScript, focusing purely on delivering the core sliding block puzzle mechanics that made Klotski a timeless challenge.
 
 Retro & Minimalistic: The design is stripped down and unpolished, reminiscent of early web games. It might not have flashy animations or modern UI elements, but it packs all the original gameplay excitement.
 
