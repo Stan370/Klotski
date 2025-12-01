@@ -51,5 +51,5 @@ This project is a browser-based Klotski puzzle game, inspired by the classic Klo
 npm install   # Install dependencies
 npm run dev   # Start development server
 npm run build # Build for production
-
+```
 Feel free to revisit our humble beginnings, relive the simplicity of early web gaming, and experience the puzzle that started it all. Enjoy the nostalgia, challenge your mind, and see how far we've come!
